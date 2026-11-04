@@ -25,6 +25,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:60
 #cal .h{text-align:center;color:var(--mut);font-size:12px}
 #cal .d{min-height:52px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:transparent;color:var(--ink);text-align:left;font-weight:400;display:flex;flex-direction:column;justify-content:space-between}
 #cal .d b{font-size:16px}#cal .d span{font-size:11px;color:var(--mut)}
+#cal .d{min-height:60px}.xb{padding:1px 8px;font-size:11px;font-weight:600;color:var(--mut)}#kUc:focus-visible{outline:2px solid var(--lte)}#cal .d .u{font-size:10px;color:var(--ink);opacity:.8}
 #cal .d.e{opacity:.45;cursor:default}#cal .d.sel{outline:2px solid var(--ink)}
 #cal .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .pf,.k b span.pf{color:var(--ok);font-weight:600}.ff,.k b span.ff{color:var(--bad);font-weight:600}
@@ -65,32 +66,40 @@ th:nth-child(2),td:nth-child(2){text-align:left}#tRaw th:nth-child(n+2):nth-chil
 <label>Testers<select id="fName" multiple size="6"></select></label>
 <label>Technology<select id="fTech" multiple size="6"><option>NR</option><option>LTE</option></select></label>
 <label>Date<select id="fDay" multiple size="6"></select></label>
+<label>Team<select id="fTeam" multiple size="6"></select></label>
 <label>Status<select id="fStat" multiple size="6"><option value="PASS">PASS</option><option value="BELOW">BELOW THRESHOLD</option><option value="FAIL">FAILED</option></select></label>
 <div style="display:flex;flex-direction:column;gap:6px"><button id="clr">Clear filters</button><button id="colAll">Collapse all</button><button id="expAll">Expand all</button></div>
 <small style="max-width:220px">Nothing selected = all. Click to toggle items. Applies to every number, chart, table and the map.</small>
 </div>
 <div id="msg"></div>
 <main>
-<div class="c w12"><h2>Threshold settings (Mbps)</h2><div class="th">
+<div class="c w12"><h2>Settings <small>throughput thresholds (Mbps) and daily minimum</small></h2><div class="th">
 <label>4G DL<input type="number" id="t4d" value="5" min="0" step="any"></label><label>4G UL<input type="number" id="t4u" value="1" min="0" step="any"></label>
 <label>5G DL<input type="number" id="t5d" value="25" min="0" step="any"></label><label>5G UL<input type="number" id="t5u" value="3" min="0" step="any"></label>
-<button id="tReset">Reset limits</button></div></div>
+<label>Min samples / day<input type="number" id="tMin" value="3" min="1" step="1"></label><button id="tReset">Reset</button></div></div>
 <div class="c k"><span>Tests</span><b id="kN">–</b></div>
 <div class="c k"><span>Avg DL / UL (Mbps)</span><b id="kA">–</b></div>
 <div class="c k"><span>Below / failed</span><b id="kB">–</b><small id="kBs"></small></div>
-<div class="c k"><span>Testers · Days</span><b id="kT">–</b></div>
-<div class="c k"><span id="kUl">Unique testers (day)</span><b id="kU">–</b><small id="kUs"></small></div>
+<div class="c k"><span id="kTl">Testers on list</span><b id="kT">–</b><small id="kTs"></small></div>
+<div class="c k" id="kUc" role="button" tabindex="0" style="cursor:pointer" title="Click to switch: count, x of y, percent"><span id="kUl">Unique testers (day)</span><b id="kU">–</b><small id="kUs"></small><small style="display:block;opacity:.65">click to switch view</small></div>
 <div class="c k"><span>Pass / Fail (current filters)</span><b id="kPF">–</b><small>Pass = DL and UL both at or above threshold</small></div>
 <div class="c w8"><h2>Test location map <small id="mc">click a pin for details</small></h2><div id="map" style="height:520px"></div></div>
-<div class="c w4"><h2>Samples per day</h2><div id="cal"></div></div>
+<div class="c w4"><h2>Samples per day<select id="kmSel" title="How to show testers per day" style="font-size:12px;padding:2px 6px;margin-left:8px"><option value="0">Testers: count</option><option value="1">Testers: x of list</option><option value="2">Testers: % of list</option></select></h2><div id="cal"></div></div>
 <div class="c w12"><h2>Technology summary <small>samples per technology band: pass / below threshold / failed</small></h2><div class="tsg"><div id="tchart"></div><div class="tavg" id="tavg"></div></div></div>
 <div class="c w12"><h2>Failure count breakdown <small>each failed sample counted once</small></h2><div class="fg">
 <div class="ft"><span>4G DL only</span><b id="f4d">0</b></div><div class="ft"><span>4G UL only</span><b id="f4u">0</b></div><div class="ft"><span>4G DL &amp; UL</span><b id="f4o">0</b></div>
 <div class="ft"><span>5G DL only</span><b id="f5d">0</b></div><div class="ft"><span>5G UL only</span><b id="f5u">0</b></div><div class="ft"><span>5G DL &amp; UL</span><b id="f5o">0</b></div></div></div>
 <div class="c w6"><h2>Top 10 testers <small>highest avg throughput</small><select id="rk" style="font-size:12px;padding:2px 6px"><option value="sum">Rank by DL + UL</option><option value="dl">Rank by DL</option><option value="ul">Rank by UL</option></select></h2><div class="sc"><table id="tTop"></table></div></div>
 <div class="c w6"><h2>Bottom 10 testers <small>lowest avg throughput (same ranking)</small></h2><div class="sc"><table id="tBot"></table></div></div>
+<div class="c w6"><h2>Top 5 testers <small>by tests completed, follows filters</small></h2><div class="sc"><table id="tTop5"></table></div></div>
+<div class="c w6"><h2>Below daily minimum <small id="qsub"></small></h2><div class="sc lw" style="max-height:300px"><table id="tQuota"></table></div><small id="qnote"></small></div>
+<div class="c w12"><h2>WhatsApp broadcast <small>failed tests and testers without samples, stamped with the export time</small></h2>
+<textarea id="wa" rows="14" aria-label="WhatsApp message" style="width:100%;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)"></textarea>
+<div class="bar" style="padding:8px 0 0"><button id="waCopy">Copy for WhatsApp</button><button id="waOpen">Open WhatsApp</button><button id="waRef">Refresh time</button></div><small id="waNote"></small></div>
 <div class="c w12"><h2>Tester viewer <small>testers in the current filters</small></h2><div class="sc lw" style="max-height:300px"><table id="tTest"></table></div></div>
-<div class="c w12"><h2>Throughput: latest 15 tests <small>DL dark, UL light</small></h2><div id="ch1"></div></div>
+<div class="c w12"><h2>Throughput candles <small>open/close = first/last sample, wick = lowest/highest</small><select id="cg" style="font-size:12px;padding:2px 6px"><option value="h">Per hour</option><option value="d" selected>Per day</option><option value="w">Per week</option></select></h2>
+<b style="font-size:13px">Download (Mbps)</b><div class="sc" id="chDL"></div><b style="font-size:13px;display:block;margin-top:10px">Upload (Mbps)</b><div class="sc" id="chUL"></div>
+<small class="lg"><i style="background:var(--ok)"></i>Close at or above open<i style="background:var(--bad)"></i>Close below open · follows the filters</small></div>
 <div class="c w6"><h2>Samples per day (LTE / NR)</h2><div id="chDay"></div></div>
 <div class="c w6"><h2>Pass rate per day (%)</h2><div id="chRate"></div></div>
 <div class="c w6"><h2>Pass vs fail</h2><div id="chDonut" style="display:flex;gap:16px;justify-content:space-around;flex-wrap:wrap"></div></div>
@@ -110,27 +119,32 @@ const esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt
 const tech=s=>/NR|5G|NSA|SA/i.test(s)?"NR":"LTE";
 
 function findCol(h,keys){return h.findIndex(x=>keys.some(k=>new RegExp(k,"i").test(x)))}
-let RAW={head:[],data:[],c:{}},fitKey=null;
+let RAW={head:[],data:[],c:{}},fitKey=null,ROSTER=[],TEAMLIST=[],TEAM=new Map();
+const RF=()=>{const T=vals("fTeam");return T.length?ROSTER.filter(n=>{const o=TEAM.get(nk(n));return o&&T.includes(o.v)}):ROSTER};
 function build(head,data){
   const c={name:findCol(head,["full name","\\bname\\b"]),dt:findCol(head,["date and time"]),tb:findCol(head,["technology","\\bband\\b"]),
-   id:findCol(head,["test id"]),dl:findCol(head,["\\bdl\\b"]),ul:findCol(head,["\\bul\\b"]),lat:findCol(head,["\\blat\\b"]),lon:findCol(head,["\\blon\\b"])};
+   id:findCol(head,["test id"]),dl:findCol(head,["\\bdl\\b"]),ul:findCol(head,["\\bul\\b"]),lat:findCol(head,["\\blat\\b"]),lon:findCol(head,["\\blon\\b"]),team:findCol(head,["team assignment","\\bteam\\b"])};
   const seen=new Set();RAW={head,data,c};
   rows=data.map(r=>{const t=new Date(r[c.dt]);const dl=num(r[c.dl]),ul=num(r[c.ul]);
-    return{_raw:r,name:(r[c.name]||"").trim()||"(blank)",t:isNaN(t)?null:t,tb:String(r[c.tb]||""),tech:tech(r[c.tb]),id:String(r[c.id]||""),dl,ul,lat:num(r[c.lat]),lon:num(r[c.lon])}})
+    return{_raw:r,team:c.team>=0?String(r[c.team]||"").trim():"",name:(r[c.name]||"").trim()||"(blank)",t:isNaN(t)?null:t,tb:String(r[c.tb]||""),tech:tech(r[c.tb]),id:String(r[c.id]||""),dl,ul,lat:num(r[c.lat]),lon:num(r[c.lon])}})
    .filter(r=>r.dl!==null&&r.ul!==null&&(r.id===""||!seen.has(r.id)&&seen.add(r.id)));
+  TEAM=new Map();rows.forEach(r=>{if(!r.team)return;const k=nk(r.name),o=TEAM.get(k);if(!o||(r.t&&+r.t>o.t))TEAM.set(k,{t:r.t?+r.t:0,v:r.team})});
   fill();render();
 }
+const nk=x=>String(x).toLowerCase().replace(/\s+/g," ").trim();
 const vals=id=>[...$(id).selectedOptions].map(o=>o.value);
 function fill(){
   const keep=(id,list)=>{const cur=new Set(vals(id));$(id).innerHTML=list.map(x=>`<option${cur.has(x)?" selected":""}>${esc(x)}</option>`).join("")};
-  keep("fName",[...new Set(rows.map(r=>r.name))].sort());
+  const seenN=new Set(),all=[];[...ROSTER,...rows.map(r=>r.name)].forEach(n=>{if(!seenN.has(nk(n))){seenN.add(nk(n));all.push(n)}});keep("fName",all.sort((a,b)=>a.localeCompare(b)));
+  keep("fTeam",[...new Set([...TEAMLIST,...rows.map(r=>r.team)].filter(Boolean))].sort((a,b)=>a.localeCompare(b)));
   keep("fDay",[...new Set(rows.filter(r=>r.t).map(r=>ymd(r.t)))].sort().reverse());
 }
 const ymd=t=>t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
 const day=r=>r.t?ymd(r.t):"";
 let calM=null;
-function filtered(){const n=vals("fName"),t=vals("fTech"),d=vals("fDay"),z=vals("fStat");
-  return rows.filter(r=>(!n.length||n.includes(r.name))&&(!t.length||t.includes(r.tech))&&(!d.length||d.includes(day(r)))&&(!z.length||z.includes(st(r))))}
+function filtered(){const n=vals("fName"),t=vals("fTech"),d=vals("fDay"),z=vals("fStat"),u=vals("fTeam");
+  const ns=new Set(n.map(nk));
+  return rows.filter(r=>(!n.length||ns.has(nk(r.name)))&&(!t.length||t.includes(r.tech))&&(!u.length||u.includes(r.team))&&(!d.length||d.includes(day(r)))&&(!z.length||z.includes(st(r))))}
 const low=r=>{const T=TH[r.tech];return{dl:r.dl<T.dl,ul:r.ul<T.ul}};
 
 function render(){
@@ -140,20 +154,23 @@ function render(){
   let both=0,dlo=0,ulo=0;d.forEach(r=>{const l=low(r);if(l.dl&&l.ul)both++;else if(l.dl)dlo++;else if(l.ul)ulo++});
   const bad=both+dlo+ulo;
   $("kB").textContent=bad+(d.length?" ("+Math.round(bad/d.length*100)+"%)":"");
-  $("kT").textContent=new Set(d.map(r=>r.name)).size+" · "+new Set(d.map(day).filter(Boolean)).size;
+  {const na=new Set(d.map(r=>nk(r.name))).size;$("kTl").textContent=ROSTER.length?"Testers on list":"Testers (filters)";$("kT").textContent=ROSTER.length?RF().length:na;{const nd=new Set(d.map(day).filter(Boolean)).size;$("kTs").textContent=na+" in current filters · "+nd+(nd===1?" day":" days")}}
   [["LTE","4"],["NR","5"]].forEach(([b,n])=>{let a=0,u=0,o=0;d.filter(r=>r.tech===b).forEach(r=>{const l=low(r);if(l.dl&&l.ul)o++;else if(l.dl)a++;else if(l.ul)u++});
     $("f"+n+"d").textContent=a;$("f"+n+"u").textContent=u;$("f"+n+"o").textContent=o});
   logTable(d);
   const pf=b=>{const x=d.filter(r=>r.tech===b);const f=x.filter(r=>{const l=low(r);return l.dl||l.ul}).length;return{n:x.length,f,p:x.length-f}};
   const A=pf("NR"),B=pf("LTE"),tp=A.p+B.p,tf=A.f+B.f;
   $("kPF").innerHTML=`<span class="pf">${tp}</span> / <span class="ff">${tf}</span>`;
-  const N=vals("fName"),T=vals("fTech"),sel=vals("fDay");
-  const base=rows.filter(r=>(!N.length||N.includes(r.name))&&(!T.length||T.includes(r.tech)));
+  const N=vals("fName"),T=vals("fTech"),TM=vals("fTeam"),sel=vals("fDay");
+  const nsN=new Set(N.map(nk)),base=rows.filter(r=>(!N.length||nsN.has(nk(r.name)))&&(!T.length||T.includes(r.tech))&&(!TM.length||TM.includes(r.team)));
   const days=[...new Set(base.map(day).filter(Boolean))].sort(),today=ymd(new Date());
   const dset=sel.length?sel:[days.includes(today)?today:days[days.length-1]];
   const dd=base.filter(r=>dset.includes(day(r)));
   $("kUl").textContent="Unique testers on "+(dset.length>1?dset.length+" selected days":dset[0]||"–")+(sel.length?"":(dset[0]===today?" (today)":" (latest day)"));
-  $("kU").textContent=dset[0]?new Set(dd.map(r=>r.name)).size:"–";$("kUs").textContent=dd.length+" samples";
+  {const un=new Set(dd.map(r=>nk(r.name))),tot=RF().length,act=tot?RF().filter(n=>un.has(nk(n))).length:un.size,pct=tot?Math.round(act/tot*100):0,km=KM();
+   $("kU").textContent=!dset[0]?"–":km===1&&tot?act+" of "+tot:km===2&&tot?pct+"%":String(un.size);
+   $("kUs").textContent=(tot?act+" of "+tot+" on list · "+pct+"% · ":"")+dd.length+" samples"}
+  quota(dset,N);waFill();
   panels(d);
   cal(base,days,sel,dset[0]);
   latest(d);map(d);charts(d,base);
@@ -208,21 +225,34 @@ function cal(base,days,sel,dk){
   if(!days.length){$("cal").innerHTML="<small>No dated samples.</small>";return}
   if(!calM||calM.k!==ymd(new Date(calM.y,calM.m,1))&&false)calM=null;
   if(!calM){const t=new Date(dk+"T00:00:00");calM={y:t.getFullYear(),m:t.getMonth()}}
-  const cnt={};base.forEach(r=>{const k=day(r);if(k)cnt[k]=(cnt[k]||0)+1});
+  const cnt={},uq={};base.forEach(r=>{const k=day(r);if(k){cnt[k]=(cnt[k]||0)+1;(uq[k]=uq[k]||new Set()).add(nk(r.name))}});
+  const rs=new Set(RF().map(nk)),tot=RF().length,km=KM(),xr=k=>[...uq[k]].filter(n=>rs.has(n)).length;$("kmSel").value=km;
   const mx=Math.max(...Object.values(cnt),1),first=new Date(calM.y,calM.m,1),n=new Date(calM.y,calM.m+1,0).getDate();
   let h=`<div class="nav"><button id="cp" aria-label="Previous month">&lt;</button><b>${first.toLocaleString(undefined,{month:"long",year:"numeric"})}</b><button id="cn" aria-label="Next month">&gt;</button></div><div class="g">`;
   "Sun Mon Tue Wed Thu Fri Sat".split(" ").forEach(x=>h+=`<div class="h">${x}</div>`);
   for(let i=0;i<first.getDay();i++)h+="<div></div>";
   for(let i=1;i<=n;i++){const k=ymd(new Date(calM.y,calM.m,i)),c=cnt[k]||0;
     const bg=c?`color-mix(in srgb,var(--lte) ${15+Math.round(c/mx*60)}%,transparent)`:"transparent";
-    h+=`<button class="d${c?"":" e"}${sel.includes(k)?" sel":""}" data-k="${k}" style="background:${bg}" ${c?"":"disabled"} title="${c} samples"><span>${i}</span><b>${c||""}</b></button>`}
-  $("cal").innerHTML=h+"</div>";
+    h+=`<button class="d${c?"":" e"}${sel.includes(k)?" sel":""}" data-k="${k}" style="background:${bg}" ${c?"":"disabled"} title="${c} samples · ${c?uq[k].size:0} unique testers${tot&&c?" · "+xr(k)+" of "+tot+" on list ("+Math.round(xr(k)/tot*100)+"%)":""}"><span>${i}</span><b>${c||""}</b><span class="u">${c?(tot&&km===1?xr(k)+"/"+tot:tot&&km===2?Math.round(xr(k)/tot*100)+"%":uq[k].size+" ppl"):""}</span></button>`}
+  $("cal").innerHTML=h+"</div><small>Big number = tests that day · small = testers who submitted (x/y of the tester list, % of list, or count)</small>";
   $("cp").onclick=()=>{calM=new Date(calM.y,calM.m-1,1);calM={y:calM.getFullYear(),m:calM.getMonth()};render()};
   $("cn").onclick=()=>{calM=new Date(calM.y,calM.m+1,1);calM={y:calM.getFullYear(),m:calM.getMonth()};render()};
   $("cal").querySelectorAll(".d:not(.e)").forEach(b=>b.onclick=()=>{const o=[...$("fDay").options].find(o=>o.value===b.dataset.k);if(o){o.selected=!o.selected;render()}});
 }
 const st=r=>{const l=low(r);return l.dl&&l.ul?"FAIL":l.dl||l.ul?"BELOW":"PASS"};
 const COL={PASS:"#1d8a5a",BELOW:"#e0a000",FAIL:"#c0392b"};
+function quota(dset,N){
+  const min=Math.max(1,parseInt($("tMin").value)||3);
+  if(!ROSTER.length){$("tQuota").innerHTML="";$("qsub").textContent="";$("qnote").textContent="Tester list not available yet. Add the updated doGet (ookla_doGet.gs) to your Apps Script so the dashboard can read the List tab, column A.";return}
+  const ns=new Set(N.map(nk)),people=RF().filter(n=>!N.length||ns.has(nk(n))),cnt={};
+  rows.forEach(r=>{const k=day(r);if(k&&dset.includes(k)){const key=k+"|"+nk(r.name);cnt[key]=(cnt[key]||0)+1}});
+  const out=[];dset.forEach(k=>people.forEach(n=>{const c=cnt[k+"|"+nk(n)]||0;if(c<min)out.push({k,n,c})}));
+  out.sort((a,b)=>b.k.localeCompare(a.k)||a.c-b.c||a.n.localeCompare(b.n));
+  $("qsub").textContent=(dset.length>1?out.length+" of "+people.length*dset.length+" tester-days":out.length+" of "+people.length+" testers")+" under "+min+" samples"+(dset.length===1?" on "+dset[0]:"");
+  $("tQuota").innerHTML="<thead><tr><th>Day</th><th>Tester</th><th>Samples</th><th>Short by</th></tr></thead><tbody>"+(out.length?out.map(o=>`<tr><td>${o.k}</td><td>${esc(o.n)}</td><td class="${o.c?"":"ff"}">${o.c}</td><td>${min-o.c}</td></tr>`).join(""):'<tr><td colspan="4">Everyone on the list reached the minimum.</td></tr>')+"</tbody>";
+  const rn=new Set(ROSTER.map(nk)),un=[...new Set(rows.filter(r=>dset.includes(day(r))&&!rn.has(nk(r.name))).map(r=>r.name))];
+  $("qnote").textContent="Counts all technologies for the day. "+(vals("fTeam").length?"The team filter uses each tester's most recent team in the sheet; testers who never submitted are left out. ":"")+(un.length?"Names in the sheet that are not on the list: "+un.join(", ")+".":"");
+}
 function panels(d){
   const g={};d.forEach(r=>{const k=r.tb||r.tech;(g[k]=g[k]||[]).push(r)});
   const ks=Object.keys(g).sort((a,b)=>g[b].length-g[a].length).slice(0,10),mx=Math.max(...ks.map(k=>g[k].length),1);
@@ -231,22 +261,32 @@ function panels(d){
   $("tavg").innerHTML=d.length?`<small>Average (all shown)</small><div class="big">${f2(avg(d.map(r=>r.dl)))} <small>Mbps DL</small></div><div class="big">${f2(avg(d.map(r=>r.ul)))} <small>Mbps UL</small></div><div style="margin-top:10px"><small>By technology band (DL / UL)</small>`+ks.map(k=>`<div class="av"><span>${esc(k)}</span><b>${f2(avg(g[k].map(r=>r.dl)))} / ${f2(avg(g[k].map(r=>r.ul)))}</b></div>`).join("")+"</div>":"<small>No data.</small>";
   const U={};d.forEach(r=>(U[r.name]=U[r.name]||[]).push(r));
   const us=Object.keys(U).map(n=>{const x=U[n],c={PASS:0,BELOW:0,FAIL:0};x.forEach(r=>c[st(r)]++);return{n,k:x.length,c,dl:avg(x.map(r=>r.dl)),ul:avg(x.map(r=>r.ul)),t:Math.max(...x.map(r=>r.t?+r.t:0))}});
-  $("tTest").innerHTML="<thead><tr><th>Tester</th><th>Samples</th><th>Pass</th><th>Below</th><th>Failed</th><th>Avg DL</th><th>Avg UL</th><th>Last test</th></tr></thead><tbody>"+
-    [...us].sort((a,b)=>b.k-a.k).map(u=>`<tr><td>${esc(u.n)}</td><td>${u.k}</td><td class="pf">${u.c.PASS}</td><td style="color:#c58a00">${u.c.BELOW}</td><td class="ff">${u.c.FAIL}</td><td>${f2(u.dl)}</td><td>${f2(u.ul)}</td><td>${u.t?new Date(u.t).toLocaleString():""}</td></tr>`).join("")+"</tbody>";
+  $("tTest").innerHTML="<thead><tr><th>Tester</th><th>Team</th><th>Samples</th><th>Pass</th><th>Below</th><th>Failed</th><th>Avg DL</th><th>Avg UL</th><th>Last test</th></tr></thead><tbody>"+
+    [...us].sort((a,b)=>b.k-a.k).map(u=>`<tr><td>${esc(u.n)}</td><td>${esc((TEAM.get(nk(u.n))||{}).v||"")}</td><td>${u.k}</td><td class="pf">${u.c.PASS}</td><td style="color:#c58a00">${u.c.BELOW}</td><td class="ff">${u.c.FAIL}</td><td>${f2(u.dl)}</td><td>${f2(u.ul)}</td><td>${u.t?new Date(u.t).toLocaleString():""}</td></tr>`).join("")+"</tbody>";
+  $("tTop5").innerHTML="<tr><th>#</th><th>Tester</th><th>Tests</th><th>Avg DL</th><th>Avg UL</th></tr>"+[...us].sort((a,b)=>b.k-a.k||b.dl-a.dl).slice(0,5).map((u,i)=>`<tr><td>${i+1}</td><td>${esc(u.n)}</td><td>${u.k}</td><td>${f2(u.dl)}</td><td>${f2(u.ul)}</td></tr>`).join("");
   const m=$("rk").value,sc=u=>m==="dl"?u.dl:m==="ul"?u.ul:u.dl+u.ul,srt=[...us].sort((a,b)=>sc(b)-sc(a));
   const hd="<tr><th>#</th><th>Tester</th><th>Tests</th><th>Avg DL</th><th>Avg UL</th></tr>",rw=a=>a.slice(0,10).map((u,i)=>`<tr><td>${i+1}</td><td>${esc(u.n)}</td><td>${u.k}</td><td>${f2(u.dl)}</td><td>${f2(u.ul)}</td></tr>`).join("");
   $("tTop").innerHTML=hd+rw(srt);$("tBot").innerHTML=hd+rw([...srt].reverse());
 }
 function latest(d){
-  const p=d.filter(r=>r.t).sort((a,b)=>b.t-a.t).slice(0,15).reverse();
-  if(!p.length){$("ch1").innerHTML="<small>No timed tests for this filter.</small>";return}
-  const W=900,H=240,m={l:40,r:10,t:10,b:30},mx=Math.max(...p.map(r=>Math.max(r.dl,r.ul)),1),bw=(W-m.l-m.r)/p.length,Y=v=>H-m.b-v/mx*(H-m.t-m.b);
-  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Latest 15 tests">`;
-  for(let i=0;i<=4;i++){const v=mx*i/4;o+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${Math.round(v)}</text>`}
-  p.forEach((r,i)=>{const c=r.tech==="NR"?"var(--nr)":"var(--lte)",x=m.l+i*bw;
-    o+=`<rect x="${x+bw*.1}" y="${Y(r.dl)}" width="${bw*.38}" height="${Y(0)-Y(r.dl)}" fill="${c}"><title>DL ${f2(r.dl)} · ${esc(r.name)}</title></rect><rect x="${x+bw*.5}" y="${Y(r.ul)}" width="${bw*.38}" height="${Y(0)-Y(r.ul)}" fill="${c}" opacity=".45"><title>UL ${f2(r.ul)} · ${esc(r.name)}</title></rect>`+
-    `<text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="10" fill="var(--mut)">${String(r.t.getHours()).padStart(2,"0")}:${String(r.t.getMinutes()).padStart(2,"0")}</text>`});
-  $("ch1").innerHTML=o+'</svg><small class="lg"><i style="background:var(--lte)"></i>LTE<i style="background:var(--nr)"></i>NR</small>';
+  const g=$("cg").value,p=d.filter(r=>r.t).sort((a,b)=>a.t-b.t);
+  const kf=r=>{const t=r.t;if(g==="h")return ymd(t)+" "+String(t.getHours()).padStart(2,"0");if(g==="w"){const x=new Date(t);x.setDate(x.getDate()-(x.getDay()+6)%7);return ymd(x)}return ymd(t)};
+  const B=new Map();p.forEach(r=>{const k=kf(r);if(!B.has(k))B.set(k,[]);B.get(k).push(r)});
+  const keys=[...B.keys()];
+  candle("chDL",keys,B,"dl",g);candle("chUL",keys,B,"ul",g);
+}
+function candle(id,keys,B,f,g){
+  if(!keys.length){$(id).innerHTML="<small>No timed tests for this filter.</small>";return}
+  const n=keys.length,slot=Math.max(16,Math.min(40,900/n)),W=Math.max(900,Math.round(n*slot+54)),H=240,m={l:44,r:10,t:10,b:34},sl=(W-m.l-m.r)/n;
+  const C=keys.map(k=>{const v=B.get(k).map(r=>r[f]);return{k,o:v[0],c:v[v.length-1],h:Math.max(...v),l:Math.min(...v),n:v.length}});
+  const mn=Math.min(...C.map(c=>c.l)),mx=Math.max(...C.map(c=>c.h)),rg=(mx-mn)||1,y0=Math.max(0,mn-rg*.08),y1=mx+rg*.08;
+  const Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b),step=Math.max(1,Math.ceil(62/sl));
+  let o=`<svg viewBox="0 0 ${W} ${H}" style="width:${W}px;min-width:100%" role="img" aria-label="${f.toUpperCase()} candles">`;
+  for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4;o+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="var(--mut)">${Math.round(v)}</text>`}
+  C.forEach((c,i)=>{const x=m.l+(i+.5)*sl,col=c.c>c.o?"var(--ok)":c.c<c.o?"var(--bad)":"var(--mut)",top=Y(Math.max(c.o,c.c)),bh=Math.max(2,Math.abs(Y(c.o)-Y(c.c)));
+    o+=`<g><title>${c.k} · open ${f2(c.o)} · high ${f2(c.h)} · low ${f2(c.l)} · close ${f2(c.c)} · ${c.n} samples</title><line x1="${x}" x2="${x}" y1="${Y(c.h)}" y2="${Y(c.l)}" stroke="${col}" stroke-width="1.5"/><rect x="${x-sl*.3}" y="${top}" width="${sl*.6}" height="${bh}" fill="${col}"/></g>`;
+    if(i%step===0){const lb=g==="h"?c.k.slice(5,10)+" "+c.k.slice(11)+"h":c.k.slice(5);o+=`<text x="${x}" y="${H-12}" text-anchor="middle" font-size="10" fill="var(--mut)">${lb}</text>`}});
+  $(id).innerHTML=o+"</svg>";
 }
 let M=null,grp=null,me=null,shown=[];
 function initMap(){
@@ -272,7 +312,7 @@ function map(d){
   d.forEach(r=>{r._m=null;if(r.lat===null||r.lon===null||(!r.lat&&!r.lon))return;const s=st(r);
     r._m=L.circleMarker([r.lat,r.lon],{radius:6,color:"#fff",weight:1.5,fillColor:COL[s],fillOpacity:.92}).bindPopup(`<b>${esc(r.name)}</b><br>${r.t?r.t.toLocaleString():""}<br>${esc(r.tb)} · ${s}<br>DL ${f2(r.dl)} / UL ${f2(r.ul)} Mbps<br>ID ${esc(r.id)}`).addTo(grp);pts.push([r.lat,r.lon])});
   const cn={PASS:0,BELOW:0,FAIL:0};d.forEach(r=>{if(r._m)cn[st(r)]++});$('lgP').textContent=cn.PASS;$('lgB').textContent=cn.BELOW;$('lgF').textContent=cn.FAIL;$('mc').textContent=pts.length+' of '+d.length+' tests plotted · click a pin for details';
-  const fk=["fName","fTech","fDay","fStat"].map(i=>vals(i).join(",")).join("|");
+  const fk=["fName","fTech","fDay","fTeam","fStat"].map(i=>vals(i).join(",")).join("|");
   if(pts.length&&fk!==fitKey){fitKey=fk;M.fitBounds(pts,{padding:[30,30],maxZoom:17})}
 }
 function logTable(d){
@@ -289,6 +329,27 @@ function parseCSV(t){const out=[];let r=[],c="",q=false;for(let i=0;i<t.length;i
   else if(ch==='"')q=true;else if(ch===","){r.push(c);c=""}else if(ch==="\n"){r.push(c);out.push(r);r=[];c=""}else if(ch!=="\r")c+=ch}
   if(c||r.length){r.push(c);out.push(r)}return out}
 const APPS_URL="https://script.google.com/macros/s/AKfycbwtMH8vRjM_QlDgQ2ainbExqm5QPZ4ChqxnKDA96czagUCwGcY_xH52uNyqjKAdSfhGvQ/exec";  // paste your Apps Script web app URL (ends with /exec) here, or use the Data link button
+const KM=()=>{try{const v=localStorage.getItem("ookla_kmode");return v===null?1:(+v||0)%3}catch(e){return 1}};
+const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],p2=n=>String(n).padStart(2,"0");
+const stampNow=()=>{const n=new Date();return n.getDate()+" "+MO[n.getMonth()]+" "+n.getFullYear()+" "+p2(n.getHours())+":"+p2(n.getMinutes())+"H"};
+let waDirty=false;
+function waText(){
+  const now=new Date(),sel=vals("fDay").sort(),dk=sel.length?sel[sel.length-1]:ymd(now),dt=new Date(dk+"T00:00:00");
+  const h=now.getHours(),t12=(h%12||12)+":"+p2(now.getMinutes())+(h<12?"am":"pm"),dl=MO[dt.getMonth()]+" "+dt.getDate()+", "+dt.getFullYear();
+  const G=new Map();rows.filter(r=>day(r)===dk).forEach(r=>{const k=nk(r.name);if(!G.has(k))G.set(k,{n:r.name,t:0,f:0});const g=G.get(k);g.t++;if(st(r)!=="PASS")g.f++});
+  const spell={};ROSTER.forEach(n=>spell[nk(n)]=n);
+  const bad=[...G.entries()].filter(([k,g])=>g.f>0).sort((a,b)=>b[1].f-a[1].f||(spell[a[0]]||a[1].n).localeCompare(spell[b[0]]||b[1].n));
+  const fl=bad.length?bad.map(([k,g],i)=>(i+1)+". "+(spell[k]||g.n)+"  ("+g.f+" of "+g.t+" test"+(g.t>1?"s":"")+" conducted)").join("\n\n"):"None";
+  const none=ROSTER.filter(n=>!G.has(nk(n))).sort((a,b)=>a.localeCompare(b));
+  const nl=!ROSTER.length?"(tester list not available)":none.length?none.map((n,i)=>(i+1)+". "+n).join("\n"):"None";
+  $("waNote").textContent="Report day: "+dl+" (the selected day, otherwise today). Counts all technologies and uses the current thresholds. Time is taken when you copy or refresh.";
+  return "Personnel With FAILED TEST (as of "+stampNow()+"):\n"+fl+"\n\n\nPersonnel Without "+dl+", Samples as of "+t12+":\n"+nl;
+}
+function waFill(force){if(force)waDirty=false;if(!waDirty)$("wa").value=waText()}
+async function copyText(t,btn){
+  try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}
+  if(btn){const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1300)}
+}
 let csvMode=false,syncOn=true,first=true;
 try{syncOn=localStorage.getItem("ookla_sync")!=="off"}catch(e){}
 async function load(silent){
@@ -296,7 +357,8 @@ async function load(silent){
   try{
     let head,data;
     if(APPS_URL){const res=await fetch(APPS_URL);if(!res.ok)throw new Error("HTTP "+res.status);const j=await res.json();
-      if(!j.ok)throw new Error(j.error||"bad response");head=j.header;data=j.rows}
+      if(!j.ok)throw new Error(j.error||"bad response");head=j.header;data=j.rows;TEAMLIST=[...new Set((j.teams||[]).map(x=>String(x).trim()).filter(Boolean))];
+      ROSTER=[...new Set((j.roster||[]).map(x=>String(x).trim()).filter(x=>x&&!/^(engineer name|full name|name|engineers?|testers?)$/i.test(x)))]}
     else{const res=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`);
       if(!res.ok)throw new Error("HTTP "+res.status);const a=parseCSV(await res.text());head=a[0];data=a.slice(1)}
     if(first){fitKey=null;first=false}
@@ -327,15 +389,16 @@ $("exX").onclick=()=>{const x=exportData();if(!x.data.length){$("msg").textConte
   const aoa=[x.head,...x.data.map(r=>r.map((v,i)=>nc.includes(i)&&v!==""&&!isNaN(v)?Number(v):v))];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),"Ookla Results");
   XLSX.writeFile(wb,"CSP3_Ookla_"+(x.all?"Sheet_":"Filtered_")+stampName()+".xlsx")};
-["fName","fTech","fDay","fStat"].forEach(i=>{const e=$(i);e.onchange=render;e.addEventListener("mousedown",ev=>{if(ev.target.tagName==="OPTION"){ev.preventDefault();ev.target.selected=!ev.target.selected;render()}})});
-$("clr").onclick=()=>{["fName","fTech","fDay","fStat"].forEach(i=>[...$(i).options].forEach(o=>o.selected=false));render()};
-$("rk").onchange=render;
+["fName","fTech","fDay","fTeam","fStat"].forEach(i=>{const e=$(i);e.onchange=render;e.addEventListener("mousedown",ev=>{if(ev.target.tagName==="OPTION"){ev.preventDefault();ev.target.selected=!ev.target.selected;render()}})});
+$("clr").onclick=()=>{["fName","fTech","fDay","fTeam","fStat"].forEach(i=>[...$(i).options].forEach(o=>o.selected=false));render()};
+$("rk").onchange=render;$("kmSel").onchange=()=>{try{localStorage.setItem("ookla_kmode",$("kmSel").value)}catch(e){}render()};$("cg").onchange=render;
 $("csv").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
   rd.onload=()=>{const a=parseCSV(rd.result);csvMode=true;fitKey=null;build(a[0],a.slice(1));$("stamp").textContent="CSV: "+f.name+" · "+rows.length+" unique tests";$("msg").textContent=""};rd.readAsText(f)};
 
 const TI={t4d:["LTE","dl",5],t4u:["LTE","ul",1],t5d:["NR","dl",25],t5u:["NR","ul",3]};
 Object.keys(TI).forEach(k=>$(k).oninput=()=>{const v=parseFloat($(k).value);if(!isNaN(v)){TH[TI[k][0]][TI[k][1]]=v;render()}});
-$("tReset").onclick=()=>Object.keys(TI).forEach(k=>{$(k).value=TI[k][2];TH[TI[k][0]][TI[k][1]]=TI[k][2];render()});
+$("tReset").onclick=()=>{Object.keys(TI).forEach(k=>{$(k).value=TI[k][2];TH[TI[k][0]][TI[k][1]]=TI[k][2]});$("tMin").value=3;render()};
+$("tMin").oninput=render;
 $("q").oninput=()=>logTable(filtered());
 let MIN={};try{MIN=JSON.parse(localStorage.getItem("ookla_min")||"{}")}catch(e){}
 document.querySelectorAll("main .c").forEach(c=>{const h=c.querySelector("h2");if(!h)return;h.classList.add("hd");const key=h.textContent.trim().slice(0,30),b=document.createElement("button");b.className="tg";
@@ -343,5 +406,22 @@ document.querySelectorAll("main .c").forEach(c=>{const h=c.querySelector("h2");i
   b.onclick=()=>set(!c.classList.contains("min"));h.appendChild(b);c._set=set;if(MIN[key])set(true);else b.textContent="Hide"});
 $("colAll").onclick=()=>document.querySelectorAll("main .c").forEach(c=>c._set&&c._set(true));
 $("expAll").onclick=()=>document.querySelectorAll("main .c").forEach(c=>c._set&&c._set(false));
+$("wa").oninput=()=>{waDirty=true};
+$("waRef").onclick=()=>waFill(true);
+$("waCopy").onclick=()=>{waFill();copyText($("wa").value,$("waCopy"))};
+$("waOpen").onclick=()=>{waFill();window.open("https://wa.me/?text="+encodeURIComponent($("wa").value),"_blank","noopener")};
+const cycle=()=>{try{localStorage.setItem("ookla_kmode",(KM()+1)%3)}catch(e){}render()};
+$("kUc").onclick=cycle;$("kUc").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();cycle()}};
+// list export buttons
+const XT={tTop5:"Top 5 testers",tTop:"Top 10 testers",tBot:"Bottom 10 testers",tQuota:"Below daily minimum",tTest:"Tester viewer",tRaw:"Test logs"};
+function tableData(id){const r=[...$(id).rows].map(tr=>[...tr.cells].map(c=>c.textContent.trim()));return{head:r[0]||[],body:r.slice(1)}}
+function tableText(id){const{head,body}=tableData(id);
+  return XT[id]+" (as of "+stampNow()+"):\n"+body.map(r=>head[0]==="#"?r[0]+". "+r[1]+" ("+head.slice(2).map((h,i)=>h+" "+r[i+2]).join(", ")+")":r.join(" | ")).join("\n")}
+Object.keys(XT).forEach(id=>{const h=$(id).closest(".c").querySelector("h2"),w=document.createElement("span");w.style.cssText="display:inline-flex;gap:4px";
+  w.innerHTML='<button class="xb" title="Download as CSV">CSV</button><button class="xb" title="Copy as text for WhatsApp">Copy</button>';
+  const[bc,bt]=w.children;
+  bc.onclick=()=>{const{head,body}=tableData(id),q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    save(new Blob(["\ufeff"+[head,...body].map(r=>r.map(q).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"}),"CSP3_"+XT[id].replace(/\s+/g,"_")+"_"+stampName()+".csv")};
+  bt.onclick=()=>copyText(tableText(id),bt);h.appendChild(w)});
 load();
 </script></body></html>
