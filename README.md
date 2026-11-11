@@ -1,86 +1,32 @@
-# CSP3 Ookla Analytics Dashboard
+# CSP3 Ookla Daily Dashboard: Change log
 
-A single-file HTML dashboard for the **Ookla Speedtest Results** Google Sheet (mobility test logger). It shows throughput, pass/fail status, daily participation, a test-location map, and builds a WhatsApp broadcast of who failed or has not submitted.
+## Phone layout and pending badge (latest)
 
-## Files
-
-| File | Purpose |
-|---|---|
-| `CSP3_Ookla_Analytics_Dashboard.html` | The dashboard. One file, logo and background are embedded. |
-| `auth/Code.gs`, `auth/appsscript.json` | The login and data service. **Replaces `ookla_doGet.gs`.** Setup is in `AUTH_SETUP.md`. |
-| `AUTH_SETUP.md`, `AUTH_SPEC.md` | Login setup steps and the login specification. |
-| `ookla_doGet.gs` | The first, open data service (no login). Kept for reference. Retire it, see `AUTH_SETUP.md`. |
-| `SPEC.md` | Detailed specification and definitions. |
-
-## Setup
-
-Follow `AUTH_SETUP.md`. In short: create the Apps Script project from `auth/Code.gs`, run `setup()`, deploy as a web app, paste its URL into `AUTH_API_URL` in the HTML file, then register as the first admin.
+- **Phone layout reworked** (screens under 700 px wide): no more sideways scrolling, tighter margins, a compact header with the user buttons in one row, smaller buttons and text, two-column tiles, card headers that wrap cleanly with the description under the title, calendar and tables sized for small screens, and the Export menu opens as a bottom sheet.
+- **Charts size to their card** instead of being scaled down, so axis text stays readable on phones. Candle charts no longer draw giant candles when there are only a few days, and charts redraw when the screen width changes (for example when rotating the phone).
+- **Pending badge on Admin Tools:** a red count shows how many registrations and level requests are waiting. It updates at login, every 60 seconds, and after each approval or rejection.
 
 ## Login and access levels
 
-Users register with their name (picked from the list), email and a password, confirm the email with a code, and wait for an admin to approve. At login they enter email or name, password and the 6-digit code from an authenticator app (scanned once from a QR at the first login). A session lasts until 22:59H Manila time.
+- **Login added.** Register (name picked from the list, email, password), confirm the email with a code, admin approves. Login uses email or name, password and a 6-digit Google Authenticator code. The QR is scanned once at the first login. Sessions end at 22:59H Manila time.
+- **Access levels.** Admin sees everything. Team Lead sees samples whose Team Assignment matches their team. Engineer sees only their own samples. Data is filtered on the server before it is sent. Phone numbers are never sent.
+- **Role views.** Engineers have no rank tables, tester viewer, daily target, WhatsApp card, tester counts, or Tester and Team filters. Team leads have no Team filter. Load CSV and Open Google Sheet are admin only.
+- **Admin Tools.** Pending registrations and level requests with Select all and batch Approve or Reject, a Users tab (level, team, disable or enable, unlock, reset authenticator, sign out everywhere) and a Log tab.
+- **Level change requests** by any user, approved by admins only.
+- **Backend** (`auth/Code.gs`): separate Apps Script project, salted PBKDF2 password hashes, authenticator secrets kept in private Script properties, lockout after 5 failed attempts for 15 minutes, email through Gmail with Brevo as fallback.
+- **Auto-sync** now every 60 seconds (was 30).
+- **Setup screen** recommends only Google Authenticator, with Google Play and App Store links.
+- **Titles:** "CSP3 Ookla Daily Dashboard" for the page and header, "CSP Daily OOKLA Dashboard" on the login page.
+- **Header** reorganised: name, level, Admin Tools, Request level change and Log out sit under the title. Reload sheet is now **Refresh** with an icon. The export buttons are replaced by one **Export** menu (Selected data only or All data, then CSV or Excel).
 
-| | Admin | Team Lead | Engineer |
-|---|---|---|---|
-| Samples | All | Samples whose Team Assignment is their team | Their own |
-| Rank tables, Tester viewer, tester counts | Yes | Their team | No |
-| Daily target | Yes | Their team | No |
-| WhatsApp broadcast | Yes | Yes | No |
-| Export | Everything | Their team | Their own |
-| Load CSV, Open sheet, Admin page | Yes | No | No |
+## Earlier versions
 
-Every user can send a **Request level change**. Admins approve registrations and level changes (batch approve with Select all) on the **Admin** page, and can disable users, set level and team, unlock accounts, reset an authenticator, or sign someone out everywhere. The Log tab lists every login and admin action.
-
-The data is filtered on the server before it is sent, so each person's browser only ever receives what they may see. Phone numbers are never sent.
-
-## Using the dashboard
-
-**Filters** (left side panel): Testers, Technology, Team and Status are multi-select lists, and Date is a small month calendar where you can pick several days (click to toggle, Shift-click for a range of days that have tests). Selected dates show as chips you can remove, with Today, Latest day and Clear dates shortcuts. Days with tests are bold, and you can also pick a day with no tests. Nothing selected means all. Click a list item to toggle it. Clear filters resets everything. The panel has its own **Hide** button, and the hamburger button in the header shows or hides it again (on phones it slides over the page). The Settings card below the filters holds the thresholds and the daily target. Filters apply to the numbers, charts, tables, the map and the exports.
-
-**Header buttons**
-
-- Under the title: your name and level, **Admin Tools** (admins only, with a red count of pending approvals), **Request level change** and **Log out**.
-- **Open Google Sheet** (admins only) opens the Google Sheet.
-- **Auto-sync: ON/OFF** refreshes every 60 seconds. The choice is remembered.
-- **Refresh** (with a refresh icon) reloads the data now.
-- **Export** opens a menu: choose **Selected data only** (current filters) or **All data** (All team rows or All my rows for non-admins), then **CSV file** or **Excel file**. The phone column is not included. An **Ookla Result URL** column is added to the export (it is not added to the Google Sheet).
-- **Load CSV** (admins) opens a downloaded copy of the sheet. Auto-sync pauses until you press Reload sheet.
-
-**Dashboard card** (five equal tiles for the day in focus: the selected day, otherwise today, otherwise the latest day with data): test count, average DL/UL, below or failed, total listed testers, and unique testers (count, then "x of y", percent and samples underneath).
-
-**Map**: Google Map, Satellite, Dark and a **Minimal (no labels)** layer, a find-me button, and pins coloured Pass (green), Below threshold (amber) or Failing (red). Click a pin for the test details and a link to the Ookla result. **Copy as image** copies the current map view (with pins and legend) to the clipboard, or saves a PNG if the browser blocks clipboard images. Click a row in the Test logs table to jump to its pin.
-
-**Calendar**: each day shows the test count, then the testers who submitted out of the tester list ("124 of 193") and the percent. Click days to drill down. The month arrows change month.
-
-**Technology summary**: one bar per technology band, always drawn to 100% so the gap to a full pass rate is visible (striped segments). Click a below-threshold or failed segment to filter the dashboard to that technology and status. Click it again to clear. An averages panel sits on the right.
-
-**Daily target**: each test scores 1 if DL and UL meet the thresholds for its technology (4G 5/1 Mbps, 5G 25/3 Mbps by default), otherwise 0. A tester meets the target for the day with at least 3 tests and an average score of 0.5 or higher. The card lists testers on the list who do not meet it, with the reason (no tests, needs more tests, or low score). Both limits are editable in Settings.
-
-**WhatsApp broadcast**: press **Generate list** to build the message for the selected day (or today). It has "Personnel Below Daily Target" (with passed tests, score and tests still needed) and "Personnel Without <date> Samples". The time is taken when you press Generate list, and you can edit the text before **Copy for WhatsApp** or **Open WhatsApp**.
-
-**Tables and charts**: Failure breakdown, Top 5 testers by tests completed, Top 10 and Bottom 10 testers (rank by DL + UL, DL, or UL), Tester viewer (with score and team), DL and UL candlestick charts (per hour, day or week), daily trend charts, and the searchable Test logs with a link to each Ookla result.
-
-**Ookla result links**: a Test ID with 11 digits links to `https://www.speedtest.net/my-result/a/<ID>` and one with 10 digits links to `https://www.speedtest.net/my-result/i/<ID>`. Other lengths get no link. The links appear in the Test logs, the map pop-ups and the exports.
-
-**Copy and CSV on lists**: Top 5, Top 10, Bottom 10, Daily target, Tester viewer and Test logs each have **CSV** and **Copy** buttons.
-
-**Hide/Show** on each card, plus Collapse all and Expand all in the filter panel. The layout choice is remembered in the browser.
-
-## Troubleshooting
-
-| Symptom | Likely cause |
-|---|---|
-| "Could not load the data" or login errors | See the troubleshooting table in `AUTH_SETUP.md`. |
-| Tester list tiles show names only from the data, or the daily-minimum card says the list is unavailable | The updated `doGet` is not deployed, or the **List** tab name differs. |
-| Team filter is empty | The sheet has no Team Assignment column yet, or `doGet` was not updated for column C. |
-| Map shows no tiles or "Map library could not load" | No internet access, or the map host is blocked. |
-| Copy as image says some tiles were blocked | The tile server does not allow image capture. Pins and legend are still included. Use the Minimal (no labels) layer for a full capture. |
-| Excel export says the library could not load | No internet access. Use CSV. |
-| Pins missing for some tests | Those rows have no coordinates. The map header shows "x of y tests plotted". |
-| Clipboard copy does nothing | The browser blocked clipboard access. The text can still be selected in the WhatsApp card and copied by hand. |
-
-## Notes
-
-- Google tile links are unofficial. If tiles stop loading, that is the first place to check.
-- Duplicate Test IDs are counted once in the dashboard. The "Entire sheet" export still includes every row.
-- Browser storage keeps three settings: auto-sync on/off, collapsed cards, and whether the filter panel is open.
+1. Dashboard from the Google Sheet with KPIs, charts and tables, CSP3 branding.
+2. Apps Script data source, auto-sync toggle, CSV and Excel export.
+3. Leaflet map with Google Map, Satellite and Dark layers, find-me, status pins, legend.
+4. Multi-select filters, calendar drill-down, technology bars, tester viewer, Top and Bottom 10.
+5. Candlestick throughput charts.
+6. Tester list from the List tab: Top 5, daily minimum, tester count views, WhatsApp report, list exports.
+7. Team Assignment filter.
+8. Layout revamp: side filter panel, tiles card, calendar with tester share, minimal map layer and copy as image, Ookla result links, 100% technology bars with click-to-filter, consistency scoring for the daily target, WhatsApp list generated on demand.
+9. Date filter changed to a multi-date picker.
