@@ -39,7 +39,7 @@ The data is filtered on the server before it is sent, so each person's browser o
 
 **Header buttons**
 
-- Under the title: your name and level, **Admin Tools** (admins only), **Request level change** and **Log out**.
+- Under the title: your name and level, **Admin Tools** (admins only, with a red count of pending approvals), **Request level change** and **Log out**.
 - **Open Google Sheet** (admins only) opens the Google Sheet.
 - **Auto-sync: ON/OFF** refreshes every 60 seconds. The choice is remembered.
 - **Refresh** (with a refresh icon) reloads the data now.
